@@ -20,8 +20,12 @@ You can install `napari-tomoslice` via [pip]:
 This plugin provides a user interface for opening electron cryotomograms in 
 napari as both volumes and slices through volumes.
 
+![demo](https://user-images.githubusercontent.com/7307488/138575199-b065ba09-23b1-4c77-a07c-85c15c1fa67f.mp4)
+
 The plugin can be opened from the `plugins` menu in napari, or with 
 `napari-tomoslice` at the command line.
+
+![plugins-menu](https://user-images.githubusercontent.com/7307488/138575015-00ea78d9-02c1-44bc-9034-0c0a7fa8d973.png)
 
 ```shell
 Usage: napari-tomoslice [TOMOGRAM_FILE]
