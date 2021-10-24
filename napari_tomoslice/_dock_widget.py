@@ -68,6 +68,8 @@ class TomoSliceWidget(QWidget):
             "tomogram files (*.mrc)",
             options=options
         )
+        if filename == '':  # no file selected, early exit
+            return
         self.tomoslice.open_tomogram(filename)
         self.update_widget_visibility(tomogram_opened=True)
 

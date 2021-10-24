@@ -6,19 +6,8 @@
 [![tests](https://github.com/alisterburt/napari-tomoslice/workflows/tests/badge.svg)](https://github.com/alisterburt/napari-tomoslice/actions)
 [![codecov](https://codecov.io/gh/alisterburt/napari-tomoslice/branch/master/graph/badge.svg)](https://codecov.io/gh/alisterburt/napari-tomoslice)
 
-A napari plugin for interacting with electron cryotomograms
+A napari plugin for visualising and interacting with electron cryotomograms.
 
-----------------------------------
-
-This [napari] plugin was generated with [Cookiecutter] using with [@napari]'s [cookiecutter-napari-plugin] template.
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/docs/plugins/index.html
--->
 
 ## Installation
 
@@ -26,10 +15,33 @@ You can install `napari-tomoslice` via [pip]:
 
     pip install napari-tomoslice
 
+## Usage
+
+This plugin provides a user interface for opening electron cryotomograms in 
+napari as both volumes and slices through volumes.
+
+The plugin can be opened from the `plugins` menu in napari, or with 
+`napari-tomoslice` at the command line.
+
+```shell
+Usage: napari-tomoslice [TOMOGRAM_FILE]
+
+  An interactive tomogram slice viewer in napari.
+
+  Controls: x/y/z - align normal vector along x/y/z axis click and drag plane
+  - shift plane along its normal vector
+
+Arguments:
+  [TOMOGRAM_FILE]
+
+Options:
+  --help                          Show this message and exit.
+
+```
+
 ## Contributing
 
-Contributions are very welcome. Tests can be run with [tox], please ensure
-the coverage at least stays the same before you submit a pull request.
+Contributions are very welcome. 
 
 ## License
 
