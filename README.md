@@ -32,8 +32,9 @@ Usage: napari-tomoslice [TOMOGRAM_FILE]
 
   An interactive tomogram slice viewer in napari.
 
-  Controls: x/y/z - align normal vector along x/y/z axis click and drag plane
-  - shift plane along its normal vector
+  Controls: 
+  x/y/z - align normal vector along x/y/z axis 
+  click and drag - shift plane along its normal vector
 
 Arguments:
   [TOMOGRAM_FILE]
