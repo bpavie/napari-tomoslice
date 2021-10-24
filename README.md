@@ -27,7 +27,7 @@ The plugin can be opened from the `plugins` menu in napari, or with
 
 ![plugins-menu](https://user-images.githubusercontent.com/7307488/138575015-00ea78d9-02c1-44bc-9034-0c0a7fa8d973.png)
 
-```shell
+```yaml
 Usage: napari-tomoslice [TOMOGRAM_FILE]
 
   An interactive tomogram slice viewer in napari.
