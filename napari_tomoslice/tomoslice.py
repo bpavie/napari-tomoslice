@@ -183,7 +183,6 @@ class TomoSlice:
 
     def disconnect_callbacks(self):
         self.viewer.mouse_drag_callbacks.remove(self._shift_plane_callback)
-        self.viewer.mouse_drag_callbacks.remove(self._orient_plane_callback)
         self.viewer.mouse_drag_callbacks.remove(self._add_point_callback)
         for key in 'xyzo[]':
             self.viewer.keymap.pop(key.upper())
