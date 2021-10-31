@@ -9,7 +9,8 @@ import numpy as np
 from napari.utils.misc import StringEnum
 from psygnal import Signal
 
-from .plane_controls import shift_plane_along_normal, set_plane_normal_axis
+from .plane_controls import shift_plane_along_normal, set_plane_normal_axis, \
+    orient_plane_perpendicular_to_camera
 from .points_controls import add_point
 
 
@@ -53,6 +54,14 @@ class TomoSlice:
     @plane_thickness.setter
     def plane_thickness(self, value):
         self.volume_layer.experimental_slicing_plane.thickness = value
+        self.plane_thickness_changed.emit()
+
+    def increase_plane_thickness(self, event=None):
+        self.volume_layer.experimental_slicing_plane.thickness += 1
+        self.plane_thickness_changed.emit()
+
+    def decrease_plane_thickness(self, event=None):
+        self.volume_layer.experimental_slicing_plane.thickness -= 1
         self.plane_thickness_changed.emit()
 
     def open_tomogram(self, tomogram_file: str):
@@ -131,7 +140,7 @@ class TomoSlice:
             self._shift_plane_callback
         )
 
-        # plane orientation
+        # plane orientation (ortho)
         for key in 'xyz':
             callback = partial(
                 self.if_plane_enabled(set_plane_normal_axis),
@@ -148,6 +157,21 @@ class TomoSlice:
             partial(self.plane_thickness_changed.emit, self.plane_thickness)
         )
 
+        # plane orientation(camera)
+        self._orient_plane_callback = partial(
+            self.if_plane_enabled(orient_plane_perpendicular_to_camera),
+            layer=self.volume_layer
+        )
+        self.viewer.bind_key('o', self._orient_plane_callback)
+
+        # plane thickness (buttons)
+        self.viewer.bind_key(
+            '[', self.if_plane_enabled(self.decrease_plane_thickness)
+        )
+        self.viewer.bind_key(
+            ']', self.if_plane_enabled(self.increase_plane_thickness)
+        )
+
         # add point in points layer on alt-click
         self._add_point_callback = partial(
             self.if_plane_enabled(add_point),
@@ -159,5 +183,8 @@ class TomoSlice:
 
     def disconnect_callbacks(self):
         self.viewer.mouse_drag_callbacks.remove(self._shift_plane_callback)
-        for key in 'xyz':
+        self.viewer.mouse_drag_callbacks.remove(self._orient_plane_callback)
+        self.viewer.mouse_drag_callbacks.remove(self._add_point_callback)
+        for key in 'xyzo[]':
             self.viewer.keymap.pop(key.upper())
+
