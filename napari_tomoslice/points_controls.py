@@ -15,7 +15,7 @@ def add_point(viewer, event, volume_layer: napari.layers.Image = None):
         points_layer = viewer.layers.selection.active
 
     # Ensure added points will be visible until plane depth is sorted
-    points_layer.blending = 'additive'
+    points_layer.blending = 'translucent_no_depth'
 
     # Early exit if volume_layer isn't visible
     if not volume_layer.visible:
