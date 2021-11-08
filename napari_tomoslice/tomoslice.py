@@ -10,8 +10,9 @@ from napari.utils.misc import StringEnum
 from psygnal import Signal
 
 from .plane_controls import shift_plane_along_normal, set_plane_normal_axis, \
-    orient_plane_perpendicular_to_camera
+    orient_plane_perpendicular_to_camera, orient_plane_on_mouse_drag
 from .points_controls import add_point
+from napari.utils.geometry import clamp_point_to_bounding_box
 
 
 class RenderingMode(StringEnum):
@@ -120,6 +121,42 @@ class TomoSlice:
             size=10,
         )
 
+    def activate_plane_follows_camera(self):
+        self.viewer.mouse_drag_callbacks.append(
+            self._plane_follows_camera_callback
+        )
+
+    def deactivate_plane_follows_camera(self):
+        self.viewer.mouse_drag_callbacks.remove(
+            self._plane_follows_camera_callback
+        )
+
+    def shift_plane_up(self, event=None):
+        updated_position = \
+            np.array(
+                self.volume_layer.experimental_slicing_plane.position
+            ) + 3 * np.array(
+                self.volume_layer.experimental_slicing_plane.normal
+            )
+        self.volume_layer.experimental_slicing_plane.position = clamp_point_to_bounding_box(
+            point=updated_position,
+            bounding_box=self.volume_layer._display_bounding_box(
+                self.viewer.dims.displayed)
+        )
+
+    def shift_plane_down(self, event=None):
+        updated_position = \
+            np.array(
+                self.volume_layer.experimental_slicing_plane.position
+            ) - 3 * np.array(
+                self.volume_layer.experimental_slicing_plane.normal
+            )
+        self.volume_layer.experimental_slicing_plane.position = clamp_point_to_bounding_box(
+            point=updated_position,
+            bounding_box=self.volume_layer._display_bounding_box(
+                self.viewer.dims.displayed)
+        )
+
     def if_plane_enabled(self, func):
         """Decorator for conditional execution of callbacks.
         """
@@ -131,7 +168,7 @@ class TomoSlice:
         return inner
 
     def connect_callbacks(self):
-        # plane click and drag
+        # plane position (click and drag)
         self._shift_plane_callback = partial(
             self.if_plane_enabled(shift_plane_along_normal),
             layer=self.volume_layer
@@ -157,12 +194,12 @@ class TomoSlice:
             partial(self.plane_thickness_changed.emit, self.plane_thickness)
         )
 
-        # plane orientation(camera)
-        self._orient_plane_callback = partial(
-            self.if_plane_enabled(orient_plane_perpendicular_to_camera),
-            layer=self.volume_layer
-        )
-        self.viewer.bind_key('o', self._orient_plane_callback)
+        # # plane orientation(camera)
+        # self._orient_plane_callback = partial(
+        #     self.if_plane_enabled(orient_plane_perpendicular_to_camera),
+        #     layer=self.volume_layer
+        # )
+        # self.viewer.bind_key('o', self._orient_plane_callback)
 
         # plane thickness (buttons)
         self.viewer.bind_key(
@@ -171,6 +208,41 @@ class TomoSlice:
         self.viewer.bind_key(
             ']', self.if_plane_enabled(self.increase_plane_thickness)
         )
+
+        # plane position (buttons)
+        self.viewer.bind_key(
+            'PageUp', self.if_plane_enabled(self.shift_plane_up)
+        )
+        self.viewer.bind_key(
+            'PageDown', self.if_plane_enabled(self.shift_plane_down)
+        )
+
+        # create plane follows camera mouse callback
+        self._plane_follows_camera_callback = partial(
+            self.if_plane_enabled(orient_plane_on_mouse_drag),
+            plane_layer=self.volume_layer
+        )
+
+        # plane orientation (oblique, on hold o)
+        # this makes the plane follow the camera on keypress and stops on
+        # key release
+        @self.viewer.bind_key('o')
+        def plane_orientation_toggle(viewer):
+            orient_plane_perpendicular_to_camera(viewer, self.volume_layer)
+            old_camera_center = np.copy(viewer.camera.center)
+            old_camera_zoom = np.copy(viewer.camera.zoom)
+            viewer.camera.center = \
+                self.volume_layer.experimental_slicing_plane.position
+            viewer.camera.zoom = 3 * old_camera_zoom
+            self.viewer.mouse_drag_callbacks.remove(self._shift_plane_callback)
+            self.activate_plane_follows_camera()
+            yield
+            self.deactivate_plane_follows_camera()
+            self.viewer.mouse_drag_callbacks.append(self._shift_plane_callback)
+            viewer.camera.center = old_camera_center
+            viewer.camera.zoom = old_camera_zoom
+
+        self._plane_orientation_toggle = plane_orientation_toggle
 
         # add point in points layer on alt-click
         self._add_point_callback = partial(

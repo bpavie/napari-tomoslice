@@ -4,6 +4,7 @@ import napari.layers
 import napari.viewer
 import numpy as np
 from napari.utils.geometry import clamp_point_to_bounding_box
+from napari.utils.events import Event
 
 from napari_tomoslice.interactivity_utils import point_in_bounding_box, \
     drag_data_to_projected_distance, point_in_layer_bounding_box
@@ -23,6 +24,9 @@ def shift_plane_along_normal(viewer, event, layer: Optional[napari.layers.Image]
     # data bounding box. If not, exit early.
     if not point_in_bounding_box(intersection, layer.extent.data):
         return
+
+    # Update plane position to match intersection
+    layer.experimental_slicing_plane.position = intersection
 
     # Store original plane position and disable interactivity during plane drag
     original_plane_position = np.copy(layer.experimental_slicing_plane.position)
@@ -87,7 +91,22 @@ def set_plane_normal_axis(
 
 def orient_plane_perpendicular_to_camera(
         viewer: napari.viewer.Viewer,
-        layer: napari.layers.Image
+        plane_layer: napari.layers.Image
 ):
-    layer.experimental_slicing_plane.position = np.array(layer.data.shape) // 2
-    layer.experimental_slicing_plane.normal = viewer.camera.view_direction
+    # if point_in_layer_bounding_box(viewer.camera.center, plane_layer):
+    #     center = viewer.camera.center
+    # else:
+    #     center = np.array(plane_layer.data.shape // 2)
+    # plane_layer.experimental_slicing_plane.position = center
+    plane_layer.experimental_slicing_plane.normal = viewer.camera.view_direction
+
+
+def orient_plane_on_mouse_drag(
+        viewer: napari.viewer.Viewer,
+        event: Event,
+        plane_layer: napari.layers.Image,
+):
+    yield
+    while event.type == 'mouse_move':
+        orient_plane_perpendicular_to_camera(viewer=viewer, plane_layer=plane_layer)
+        yield
