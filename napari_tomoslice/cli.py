@@ -28,5 +28,4 @@ def napari_tomoslice(tomogram_file: Path = typer.Argument(
     )
     if tomogram_file is not None:
         tomoslice_widget.tomoslice.open_tomogram(tomogram_file)
-        tomoslice_widget.update_widget_visibility(tomogram_opened=True)
     napari.run()
