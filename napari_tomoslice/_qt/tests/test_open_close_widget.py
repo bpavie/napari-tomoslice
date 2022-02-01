@@ -8,10 +8,8 @@ def test_open_close_widget_behaviour(qtbot):
     close_button_callback = MagicMock()
 
     widget = OpenCloseButtonsWidget(
-        open_button_name='open me',
-        open_button_callback=open_button_callback,
-        close_button_name='close me',
-        close_button_callback=close_button_callback,
+        open_button=('open me', open_button_callback),
+        close_button=('close me', close_button_callback),
     )
     widget.show()
     qtbot.addWidget(widget)
