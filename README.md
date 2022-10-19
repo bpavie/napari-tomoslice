@@ -8,6 +8,7 @@
 
 A napari plugin for visualising and interacting with electron cryotomograms.
 
+**this repository is archived, the plugin allowed people to interact with oblique slices through tomograms in napari before this was incorporated in napari itself with napari/napari#3023 and napari/napari#3759**
 
 ## Installation
 
